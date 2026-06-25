@@ -45,6 +45,14 @@ npm run build
 
 On macOS, `npm install` also ad-hoc signs the Microsoft native Modeling MCP binary so Claude can launch it without the unsigned-binary failure.
 
+On Windows, the setup scripts detect the native Microsoft binary for the current platform:
+
+```text
+node_modules\@microsoft\powerbi-modeling-mcp-win32-x64\dist\powerbi-modeling-mcp.exe
+```
+
+Do not use `npx` as `POWERBI_MODELING_MCP_COMMAND` on Windows. If a fallback to `npx` is unavoidable, the bridge uses a Windows shell for `.cmd` launch, but the native `.exe` path is the supported path.
+
 `npm run setup` asks for:
 
 - Microsoft `powerbi-modeling-mcp` command and args
@@ -99,7 +107,7 @@ C:\Users\<you>\powerBI-auth-by-account\node_modules\@microsoft\powerbi-modeling-
 
 Use the built JS after `npm run build`.
 
-For this machine, start from [`docs/claude-desktop-config.example.json`](docs/claude-desktop-config.example.json). It points the wrapper to the Microsoft MCP binary installed by this repo:
+For macOS on this machine, start from [`docs/claude-desktop-config.example.json`](docs/claude-desktop-config.example.json). It points the wrapper to the Microsoft MCP binary installed by this repo:
 
 ```text
 /Users/ducna/powerBI-auth-by-account/node_modules/.bin/powerbi-modeling-mcp-darwin-arm64
@@ -116,7 +124,7 @@ Generic config:
       "env": {
         "POWERBI_KNOWN_WORKSPACES": "test-mcp",
         "POWERBI_DEFAULT_WORKSPACE": "test-mcp",
-        "POWERBI_MODELING_MCP_COMMAND": "/absolute/path/to/powerbi-modeling-mcp-darwin-arm64",
+        "POWERBI_MODELING_MCP_COMMAND": "/absolute/path/to/native/powerbi-modeling-mcp",
         "POWERBI_MODELING_MCP_ARGS": "--start --authmode=interactive"
       }
     }
@@ -177,3 +185,4 @@ The first query in a fresh Claude/MCP session can still trigger Microsoft accoun
 - Claude Desktop Store/MSIX uses the virtualized config path under `%LOCALAPPDATA%\Packages\Claude_<id>\LocalCache\Roaming\Claude`.
 - Close Claude Desktop before editing `claude_desktop_config.json`.
 - Always configure a real Premium/PPU workspace name in `POWERBI_KNOWN_WORKSPACES`; do not rely on `My workspace`.
+- XMLA access through Modeling MCP requires a Premium/PPU/Fabric capacity workspace.

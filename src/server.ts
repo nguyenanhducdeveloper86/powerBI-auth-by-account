@@ -3,6 +3,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { loadEnvFile } from "./env.js";
+import { defaultModelingArgs, defaultModelingCommand } from "./modelingBinary.js";
 import { ModelingMcpBridge } from "./modelingMcpBridge.js";
 
 loadEnvFile();
@@ -25,8 +26,8 @@ server.registerTool(
     authProvider: "microsoft-powerbi-modeling-mcp",
     authMode: "interactive_account",
     deviceCodeRestAuth: "disabled",
-    modelingCommand: process.env.POWERBI_MODELING_MCP_COMMAND || "bundled powerbi-modeling-mcp-darwin-arm64 when available",
-    modelingArgs: process.env.POWERBI_MODELING_MCP_ARGS || "--start --authmode=interactive",
+    modelingCommand: process.env.POWERBI_MODELING_MCP_COMMAND || defaultModelingCommand(),
+    modelingArgs: process.env.POWERBI_MODELING_MCP_ARGS || defaultModelingArgs(process.env.POWERBI_MODELING_MCP_COMMAND || defaultModelingCommand()).join(" "),
     knownWorkspaces: uniqueNonEmpty(configuredWorkspaces())
   })
 );

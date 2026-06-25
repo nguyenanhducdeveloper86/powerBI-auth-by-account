@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "mcp-powerbi": {
+    "powerbi-auth-by-account": {
       "command": "node",
       "args": ["/Users/ducna/powerBI-auth-by-account/dist/server.js"],
       "env": {

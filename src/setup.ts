@@ -1,12 +1,9 @@
 #!/usr/bin/env node
 import { chmod, writeFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
-import { resolve } from "node:path";
-import { defaultEnvPath, loadEnvFile, projectRoot } from "./env.js";
-
-const PROJECT_MODELING_MCP = resolve(projectRoot(), "node_modules/.bin/powerbi-modeling-mcp-darwin-arm64");
+import { defaultEnvPath, loadEnvFile } from "./env.js";
+import { defaultModelingArgs, defaultModelingCommand } from "./modelingBinary.js";
 
 async function main() {
   loadEnvFile();
@@ -19,12 +16,12 @@ async function main() {
 
     const modelingCommandDefault =
       process.env.POWERBI_MODELING_MCP_COMMAND ||
-      (existsSync(PROJECT_MODELING_MCP) ? PROJECT_MODELING_MCP : "npx");
+      defaultModelingCommand();
     const modelingCommand = await prompt(rl, "Microsoft Modeling MCP command", modelingCommandDefault);
     const modelingArgs = await prompt(
       rl,
       "Microsoft Modeling MCP args",
-      process.env.POWERBI_MODELING_MCP_ARGS || (modelingCommand === "npx" ? "-y @microsoft/powerbi-modeling-mcp@latest --start --authmode=interactive" : "--start --authmode=interactive")
+      process.env.POWERBI_MODELING_MCP_ARGS || defaultModelingArgs(modelingCommand).join(" ")
     );
     const knownWorkspaces = await prompt(
       rl,

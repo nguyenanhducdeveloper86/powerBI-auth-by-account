@@ -15,6 +15,8 @@ REST/device-code auth is intentionally disabled because it is often blocked by t
 - The bundled native Microsoft Modeling MCP binary launches from this repo.
 - `get_known_workspace_catalog` can connect to workspace `test-mcp`.
 - Workspace `test-mcp` returns semantic models `codex` and `hospital`.
+- Verification above was run on macOS. Windows setup uses the native `powerbi-modeling-mcp-win32-x64` binary and avoids `npx`.
+- XMLA access requires a Premium/PPU/Fabric capacity workspace.
 
 ## Expected login behavior
 

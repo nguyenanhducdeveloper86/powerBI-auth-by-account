@@ -1,7 +1,5 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
-import { existsSync } from "node:fs";
-import { resolve } from "node:path";
-import { projectRoot } from "./env.js";
+import { defaultModelingArgs, defaultModelingCommand } from "./modelingBinary.js";
 
 export type XmlaSemanticModel = {
   id: string;
@@ -117,16 +115,14 @@ export class ModelingMcpBridge {
   private async start(): Promise<void> {
     if (this.child) return;
 
-    const bundledNativeCommand = resolve(projectRoot(), "node_modules/.bin/powerbi-modeling-mcp-darwin-arm64");
-    const command = process.env.POWERBI_MODELING_MCP_COMMAND || (existsSync(bundledNativeCommand) ? bundledNativeCommand : "npx");
+    const command = process.env.POWERBI_MODELING_MCP_COMMAND || defaultModelingCommand();
     const args = process.env.POWERBI_MODELING_MCP_ARGS
       ? splitArgs(process.env.POWERBI_MODELING_MCP_ARGS)
-      : command === "npx"
-        ? ["-y", "@microsoft/powerbi-modeling-mcp@latest", "--start", "--authmode=interactive"]
-        : ["--start", "--authmode=interactive"];
+      : defaultModelingArgs(command);
 
     this.child = spawn(command, args, {
-      stdio: ["pipe", "pipe", "pipe"]
+      stdio: ["pipe", "pipe", "pipe"],
+      shell: needsWindowsShell(command)
     });
     this.child.on("exit", () => {
       this.child = undefined;
@@ -223,4 +219,10 @@ function optionalNumber(value: unknown): number | undefined {
 
 function splitArgs(input: string): string[] {
   return input.match(/(?:[^\s"]+|"[^"]*")+/g)?.map(part => part.replace(/^"|"$/g, "")) ?? [];
+}
+
+function needsWindowsShell(command: string): boolean {
+  if (process.platform !== "win32") return false;
+  const normalized = command.toLowerCase();
+  return normalized === "npx" || normalized.endsWith("\\npx") || normalized.endsWith("/npx") || normalized.endsWith(".cmd");
 }

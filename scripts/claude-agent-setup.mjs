@@ -151,12 +151,14 @@ function requireValue(argv, index, option) {
 }
 
 function findModelingMcpBinary() {
-  const candidates = [
-    resolve(repoRoot, "node_modules/.bin/powerbi-modeling-mcp-darwin-arm64"),
-    resolve(repoRoot, "node_modules/@microsoft/powerbi-modeling-mcp-darwin-arm64/dist/powerbi-modeling-mcp"),
-    resolve(repoRoot, "node_modules/@microsoft/powerbi-modeling-mcp-win32-x64/dist/powerbi-modeling-mcp.exe"),
-    resolve(repoRoot, "node_modules/@microsoft/powerbi-modeling-mcp-linux-x64/dist/powerbi-modeling-mcp")
-  ];
+  const platformMap = {
+    "win32-x64": "@microsoft/powerbi-modeling-mcp-win32-x64/dist/powerbi-modeling-mcp.exe",
+    "darwin-arm64": "@microsoft/powerbi-modeling-mcp-darwin-arm64/dist/powerbi-modeling-mcp",
+    "darwin-x64": "@microsoft/powerbi-modeling-mcp-darwin-x64/dist/powerbi-modeling-mcp",
+    "linux-x64": "@microsoft/powerbi-modeling-mcp-linux-x64/dist/powerbi-modeling-mcp"
+  };
+  const mapped = platformMap[`${process.platform}-${process.arch}`];
+  const candidates = mapped ? [resolve(repoRoot, "node_modules", mapped)] : [];
 
   for (const candidate of candidates) {
     if (existsSync(candidate)) return candidate;
