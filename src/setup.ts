@@ -3,10 +3,10 @@ import { chmod, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
-import { defaultEnvPath, loadEnvFile } from "./env.js";
+import { resolve } from "node:path";
+import { defaultEnvPath, loadEnvFile, projectRoot } from "./env.js";
 
-const LOCAL_MODELING_MCP =
-  "/Users/ducna/.codex/mcp/powerbi-modeling-mcp/node_modules/@microsoft/powerbi-modeling-mcp-darwin-arm64/dist/powerbi-modeling-mcp";
+const PROJECT_MODELING_MCP = resolve(projectRoot(), "node_modules/.bin/powerbi-modeling-mcp");
 
 async function main() {
   loadEnvFile();
@@ -20,7 +20,7 @@ async function main() {
     const tenant = await promptRequired(rl, "Directory tenant ID/domain", process.env.POWERBI_TENANT || "vnu.edu.vn");
     const modelingCommandDefault =
       process.env.POWERBI_MODELING_MCP_COMMAND ||
-      (existsSync(LOCAL_MODELING_MCP) ? LOCAL_MODELING_MCP : "npx");
+      (existsSync(PROJECT_MODELING_MCP) ? PROJECT_MODELING_MCP : "npx");
     const modelingCommand = await prompt(rl, "Microsoft Modeling MCP command", modelingCommandDefault);
     const modelingArgs = await prompt(
       rl,

@@ -42,10 +42,10 @@ It writes a local `.env` file with mode `0600`. The MCP server loads this file a
 
 Use the built JS after `npm run build`.
 
-For this machine, start from [`docs/claude-desktop-config.example.json`](docs/claude-desktop-config.example.json). It points the wrapper to the already installed Microsoft native binary:
+For this machine, start from [`docs/claude-desktop-config.example.json`](docs/claude-desktop-config.example.json). It points the wrapper to the Microsoft MCP binary installed by this repo:
 
 ```text
-/Users/ducna/.codex/mcp/powerbi-modeling-mcp/node_modules/@microsoft/powerbi-modeling-mcp-darwin-arm64/dist/powerbi-modeling-mcp
+/Users/ducna/powerBI-auth-by-account/node_modules/.bin/powerbi-modeling-mcp
 ```
 
 Generic config:
