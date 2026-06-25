@@ -54,6 +54,28 @@ On macOS, `npm install` also ad-hoc signs the Microsoft native Modeling MCP bina
 
 It writes a local `.env` file with mode `0600`. The MCP server loads this file automatically on start.
 
+## Agent Auto Setup
+
+Claude agents can generate or write Claude configuration with:
+
+```bash
+npm run setup:agent -- --workspaces test-mcp
+```
+
+Write directly to Claude Desktop config, with an automatic backup:
+
+```bash
+npm run setup:agent -- --workspaces test-mcp --write-desktop
+```
+
+Register directly with Claude Code:
+
+```bash
+npm run setup:agent -- --workspaces test-mcp --install-claude-code
+```
+
+The script installs dependencies/builds when needed, detects the native Microsoft Modeling MCP binary for the OS, and uses `--start --authmode=interactive`.
+
 ## Claude Code
 
 Register the MCP server with Claude Code:

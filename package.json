@@ -12,6 +12,7 @@
     "dev": "tsx src/server.ts",
     "postinstall": "node scripts/sign-modeling-mcp.mjs",
     "setup": "tsx src/setup.ts",
+    "setup:agent": "node scripts/claude-agent-setup.mjs",
     "start": "node dist/server.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
