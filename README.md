@@ -28,6 +28,8 @@ npm run setup
 npm run build
 ```
 
+On macOS, `npm install` also ad-hoc signs the Microsoft native Modeling MCP binary so Claude can launch it without the unsigned-binary failure.
+
 `npm run setup` asks for:
 
 - Directory tenant ID/domain
