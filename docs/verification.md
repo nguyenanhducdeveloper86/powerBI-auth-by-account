@@ -6,7 +6,7 @@ This server is a Claude-facing wrapper around Microsoft's official `powerbi-mode
 
 Authentication is handled only by Microsoft `powerbi-modeling-mcp` interactive account login.
 
-REST/device-code auth is intentionally disabled because it is often blocked by tenant admin policy.
+REST auth is intentionally disabled because it is often blocked by organization policy.
 
 ## What was verified locally
 

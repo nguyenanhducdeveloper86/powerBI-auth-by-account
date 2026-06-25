@@ -13,12 +13,12 @@ This repo is based on Microsoft's official [`powerbi-modeling-mcp`](https://gith
 
 ## What This Does Not Do
 
-- No REST device-code login.
+- No REST login flow.
 - No service principal.
 - No app secret.
 - No REST `/groups` workspace discovery.
 
-This is intentional because REST/device-code auth is often blocked by tenant admin policy.
+This is intentional because REST auth flows are often blocked by organization policy.
 
 ## Tools
 
@@ -110,7 +110,7 @@ Use the built JS after `npm run build`.
 For macOS on this machine, start from [`docs/claude-desktop-config.example.json`](docs/claude-desktop-config.example.json). It points the wrapper to the Microsoft MCP binary installed by this repo:
 
 ```text
-/Users/ducna/powerBI-auth-by-account/node_modules/.bin/powerbi-modeling-mcp-darwin-arm64
+/Users/<you>/powerBI-auth-by-account/node_modules/.bin/powerbi-modeling-mcp-darwin-arm64
 ```
 
 Generic config:
@@ -181,7 +181,7 @@ The first query in a fresh Claude/MCP session can still trigger Microsoft accoun
 ## Common Pitfalls
 
 - Windows: do not use `npx` for the Modeling MCP command. Use the native `powerbi-modeling-mcp.exe` path.
-- Authentication is `--authmode=interactive` through Microsoft Modeling MCP. Do not use REST device-code login.
+- Authentication is `--authmode=interactive` through Microsoft Modeling MCP. Do not use REST login.
 - Claude Desktop Store/MSIX uses the virtualized config path under `%LOCALAPPDATA%\Packages\Claude_<id>\LocalCache\Roaming\Claude`.
 - Close Claude Desktop before editing `claude_desktop_config.json`.
 - Always configure a real Premium/PPU workspace name in `POWERBI_KNOWN_WORKSPACES`; do not rely on `My workspace`.

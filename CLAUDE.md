@@ -27,6 +27,6 @@ npm run setup:agent -- --workspaces test-mcp --install-claude-code
 ## Rules
 
 - Use Modeling MCP interactive auth only: `--start --authmode=interactive`.
-- Do not add REST device-code tools or service-principal auth.
+- Do not add REST auth tools or service-principal auth.
 - Use real Premium/PPU workspace names in `POWERBI_KNOWN_WORKSPACES`.
 - Do not rely on `My workspace`.
