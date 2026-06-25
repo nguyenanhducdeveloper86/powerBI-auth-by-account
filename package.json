@@ -1,0 +1,45 @@
+{
+  "name": "powerbi-auth-by-account",
+  "version": "0.1.0",
+  "description": "Claude-compatible Power BI MCP using personal-account authentication only.",
+  "type": "module",
+  "bin": {
+    "powerbi-auth-by-account": "./dist/server.js",
+    "powerbi-auth-by-account-setup": "./dist/setup.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/server.ts",
+    "setup": "tsx src/setup.ts",
+    "start": "node dist/server.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nguyenanhducdeveloper86/powerBI-auth-by-account.git"
+  },
+  "keywords": [
+    "mcp",
+    "powerbi",
+    "fabric",
+    "semantic-model",
+    "claude",
+    "powerbi-modeling-mcp"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nguyenanhducdeveloper86/powerBI-auth-by-account/issues"
+  },
+  "homepage": "https://github.com/nguyenanhducdeveloper86/powerBI-auth-by-account#readme",
+  "dependencies": {
+    "@microsoft/powerbi-modeling-mcp": "^0.5.0-beta.10",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
+  }
+}
