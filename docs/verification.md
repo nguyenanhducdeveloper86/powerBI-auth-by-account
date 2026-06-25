@@ -2,32 +2,20 @@
 
 This server is a Claude-facing wrapper around Microsoft's official `powerbi-modeling-mcp`.
 
+## Authentication
+
+Authentication is handled only by Microsoft `powerbi-modeling-mcp` interactive account login.
+
+REST/device-code auth is intentionally disabled because it is often blocked by tenant admin policy.
+
 ## What was verified locally
 
 - MCP server starts over stdio and returns its tool list.
-- `list_semantic_models_in_workspace_via_modeling_mcp` launches Microsoft's native `powerbi-modeling-mcp` binary.
-- The Microsoft bridge can connect to workspace `test-mcp`.
-- The Microsoft bridge returns semantic models `codex` and `hospital` from `test-mcp`.
+- The server exposes Modeling MCP tools only.
+- The bundled native Microsoft Modeling MCP binary launches from this repo.
+- `get_known_workspace_catalog` can connect to workspace `test-mcp`.
+- Workspace `test-mcp` returns semantic models `codex` and `hospital`.
 
-## What requires personal account auth
+## Expected login behavior
 
-The REST catalog tools require a valid delegated Power BI account token:
-
-- `list_workspaces`
-- `list_semantic_models`
-- `get_catalog`
-
-Use one of:
-
-- `POWERBI_ACCESS_TOKEN` from the same personal account
-- `start_device_login` followed by `complete_device_login`
-
-Current local REST auth smoke result:
-
-```text
-authMode=personal_account_cache
-hasCachedToken=false
-get_catalog=No Power BI token available
-```
-
-That means the server is ready for Claude, but tenant-wide workspace discovery will only work after a valid delegated personal-account token is configured.
+The first Modeling MCP connection in a fresh Claude/MCP session can trigger Microsoft account login. Follow-up queries in the same running MCP session reuse the Modeling MCP process and connection.

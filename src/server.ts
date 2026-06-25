@@ -2,15 +2,11 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { AuthManager } from "./auth.js";
 import { loadEnvFile } from "./env.js";
 import { ModelingMcpBridge } from "./modelingMcpBridge.js";
-import { PowerBiClient } from "./powerbiClient.js";
 
 loadEnvFile();
 
-const auth = new AuthManager();
-const powerbi = new PowerBiClient(auth);
 const modelingBridge = new ModelingMcpBridge();
 
 const server = new McpServer({
@@ -21,74 +17,25 @@ const server = new McpServer({
 server.registerTool(
   "auth_status",
   {
-    title: "Power BI auth status",
-    description: "Show which Power BI authentication mode is configured without exposing tokens.",
+    title: "Power BI Modeling MCP auth status",
+    description: "Show Modeling MCP authentication configuration. Authentication is handled by Microsoft powerbi-modeling-mcp interactive account login.",
     inputSchema: {}
   },
-  async () => jsonResult(await auth.status())
-);
-
-server.registerTool(
-  "start_device_login",
-  {
-    title: "Start Power BI device login",
-    description: "Start personal-account device-code login for Power BI REST API. Use for one-time local setup with the signed-in user's permissions.",
-    inputSchema: {}
-  },
-  async () => jsonResult(await auth.startDeviceLogin())
-);
-
-server.registerTool(
-  "complete_device_login",
-  {
-    title: "Complete Power BI device login",
-    description: "Poll Microsoft for the pending device-code login and cache the token when authorization is complete.",
-    inputSchema: {}
-  },
-  async () => jsonResult(await auth.completeDeviceLogin())
-);
-
-server.registerTool(
-  "list_workspaces",
-  {
-    title: "List Power BI/Fabric workspaces",
-    description: "List all Fabric/Power BI workspaces visible to the authenticated account through the Power BI REST API. Use this first when the user does not provide a workspace name or id.",
-    inputSchema: {
-      includeMyWorkspace: z.boolean().optional().default(true).describe("Include the personal 'My workspace' pseudo-workspace.")
-    }
-  },
-  async ({ includeMyWorkspace }) => jsonResult(await powerbi.listWorkspaces(includeMyWorkspace))
-);
-
-server.registerTool(
-  "list_semantic_models",
-  {
-    title: "List semantic models",
-    description: "List semantic models in My workspace or in a specific workspace by id. Use list_workspaces first to resolve workspace ids. If workspace discovery is not authenticated and the user did not name a workspace, ask the user which workspace to use.",
-    inputSchema: {
-      workspaceId: z.string().optional().describe("Workspace/group id. Omit for My workspace.")
-    }
-  },
-  async ({ workspaceId }) => jsonResult(await powerbi.listSemanticModels(workspaceId ?? null))
-);
-
-server.registerTool(
-  "get_catalog",
-  {
-    title: "Get workspace and semantic model catalog",
-    description: "Return all visible workspaces and semantic models via Power BI REST API. This is the preferred tool for open-ended questions such as 'which model should I use?' or 'what workspaces can I access?'.",
-    inputSchema: {
-      includeMyWorkspace: z.boolean().optional().default(true).describe("Include My workspace datasets.")
-    }
-  },
-  async ({ includeMyWorkspace }) => jsonResult(await powerbi.getCatalog(includeMyWorkspace))
+  async () => jsonResult({
+    authProvider: "microsoft-powerbi-modeling-mcp",
+    authMode: "interactive_account",
+    deviceCodeRestAuth: "disabled",
+    modelingCommand: process.env.POWERBI_MODELING_MCP_COMMAND || "bundled powerbi-modeling-mcp-darwin-arm64 when available",
+    modelingArgs: process.env.POWERBI_MODELING_MCP_ARGS || "--start --authmode=interactive",
+    knownWorkspaces: uniqueNonEmpty(configuredWorkspaces())
+  })
 );
 
 server.registerTool(
   "list_semantic_models_in_workspace_via_modeling_mcp",
   {
     title: "List semantic models in known workspace via Microsoft Modeling MCP",
-    description: "Use Microsoft powerbi-modeling-mcp/XMLA auth to list semantic models inside a known workspace name. This is a fallback when REST workspace discovery auth is unavailable. The workspace name must be explicit; if it is missing, ask the user instead of guessing.",
+    description: "Use Microsoft powerbi-modeling-mcp interactive account auth to list semantic models inside a known workspace name. The workspace name must be explicit; if it is missing, ask the user instead of guessing.",
     inputSchema: {
       workspaceName: z.string().describe("Exact Fabric/Power BI workspace name, for example 'test-mcp'.")
     }
@@ -103,10 +50,46 @@ server.registerTool(
 );
 
 server.registerTool(
+  "open_modeling_mcp_session",
+  {
+    title: "Open Power BI Modeling MCP session",
+    description: "Trigger Microsoft powerbi-modeling-mcp interactive account auth by connecting to a workspace or workspace/model.",
+    inputSchema: {
+      workspaceName: z.string().optional().describe("Power BI workspace name. Defaults to POWERBI_DEFAULT_WORKSPACE."),
+      semanticModelName: z.string().optional().describe("Optional semantic model name. If omitted, lists semantic models in the workspace.")
+    }
+  },
+  async ({ workspaceName, semanticModelName }) => {
+    const workspace = workspaceName || process.env.POWERBI_DEFAULT_WORKSPACE;
+    if (!workspace) {
+      throw new Error("Missing workspace. Set POWERBI_DEFAULT_WORKSPACE or pass workspaceName.");
+    }
+
+    if (semanticModelName) {
+      await modelingBridge.connectFabric(workspace, semanticModelName);
+      return jsonResult({
+        source: "microsoft-powerbi-modeling-mcp",
+        authMode: "interactive_account",
+        workspaceName: workspace,
+        semanticModelName,
+        connected: true
+      });
+    }
+
+    return jsonResult({
+      source: "microsoft-powerbi-modeling-mcp",
+      authMode: "interactive_account",
+      workspaceName: workspace,
+      semanticModels: await modelingBridge.listSemanticModelsInWorkspace(workspace)
+    });
+  }
+);
+
+server.registerTool(
   "get_known_workspace_catalog",
   {
     title: "Get known workspace semantic model catalog",
-    description: "List semantic models for manually configured POWERBI_KNOWN_WORKSPACES using Microsoft Modeling MCP. Use this for CEO workflows when REST workspace discovery is unavailable.",
+    description: "List semantic models for manually configured POWERBI_KNOWN_WORKSPACES using Microsoft Modeling MCP interactive account auth.",
     inputSchema: {
       workspaceNames: z.array(z.string()).optional().describe("Optional workspace names. Defaults to POWERBI_KNOWN_WORKSPACES, then POWERBI_DEFAULT_WORKSPACE.")
     }

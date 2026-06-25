@@ -1,21 +1,29 @@
 # powerBI-auth-by-account
 
-Claude-compatible Power BI MCP using **personal account authentication only**.
+Claude-compatible Power BI MCP using **Microsoft Power BI Modeling MCP interactive account login only**.
 
-This repo is based on Microsoft's official [`powerbi-modeling-mcp`](https://github.com/microsoft/powerbi-modeling-mcp):
+This repo is based on Microsoft's official [`powerbi-modeling-mcp`](https://github.com/microsoft/powerbi-modeling-mcp).
 
-- Workspace/model querying uses Microsoft `@microsoft/powerbi-modeling-mcp` and the signed-in user's Power BI/Fabric account.
-- REST catalog tools use delegated personal-account tokens from `start_device_login` / `complete_device_login` or `POWERBI_ACCESS_TOKEN`.
-- There is no service-principal, app-secret, or client-credentials authentication path in this repo.
+## What This Does
+
+- Uses Microsoft `powerbi-modeling-mcp` for Power BI/Fabric authentication.
+- Uses interactive account auth via Modeling MCP.
+- Keeps the Modeling MCP process alive so follow-up CEO questions reuse the same session.
+- Uses manually configured known workspace names instead of REST workspace discovery.
+
+## What This Does Not Do
+
+- No REST device-code login.
+- No service principal.
+- No app secret.
+- No REST `/groups` workspace discovery.
+
+This is intentional because REST/device-code auth is often blocked by tenant admin policy.
 
 ## Tools
 
 - `auth_status`
-- `start_device_login`
-- `complete_device_login`
-- `list_workspaces`
-- `list_semantic_models`
-- `get_catalog`
+- `open_modeling_mcp_session`
 - `list_semantic_models_in_workspace_via_modeling_mcp`
 - `get_known_workspace_catalog`
 - `execute_dax_query`
@@ -32,7 +40,6 @@ On macOS, `npm install` also ad-hoc signs the Microsoft native Modeling MCP bina
 
 `npm run setup` asks for:
 
-- Directory tenant ID/domain
 - Microsoft `powerbi-modeling-mcp` command and args
 - Known workspace names
 - Default CEO workspace
@@ -59,26 +66,15 @@ Generic config:
       "command": "node",
       "args": ["/absolute/path/to/powerBI-auth-by-account/dist/server.js"],
       "env": {
-        "POWERBI_TENANT": "vnu.edu.vn",
         "POWERBI_KNOWN_WORKSPACES": "test-mcp",
         "POWERBI_DEFAULT_WORKSPACE": "test-mcp",
         "POWERBI_MODELING_MCP_COMMAND": "/absolute/path/to/powerbi-modeling-mcp-darwin-arm64",
-        "POWERBI_MODELING_MCP_ARGS": "--start"
+        "POWERBI_MODELING_MCP_ARGS": "--start --authmode=interactive"
       }
     }
   }
 }
 ```
-
-## Authentication
-
-This server supports only personal-account authentication:
-
-1. `POWERBI_ACCESS_TOKEN` containing a delegated user token.
-2. Cached personal-account token from `start_device_login` / `complete_device_login`.
-3. Microsoft Modeling MCP account login for XMLA/Fabric connections.
-
-No app secret or service principal is used.
 
 ## CEO Workflow
 
@@ -91,24 +87,11 @@ POWERBI_DEFAULT_WORKSPACE=test-mcp
 # POWERBI_DEFAULT_SEMANTIC_MODEL=hospital
 ```
 
-Then Claude can use `get_known_workspace_catalog` to list models from configured workspaces without REST workspace discovery, choose the relevant semantic model from schema/context, and call `execute_dax_query` for follow-up business questions.
+Then Claude can:
 
-The wrapper keeps the Microsoft Modeling MCP process alive, so repeated questions reuse the same process and should reduce repeated login prompts.
+1. Call `open_modeling_mcp_session` to trigger Microsoft account login through Modeling MCP.
+2. Call `get_known_workspace_catalog` to list semantic models in configured workspaces.
+3. Choose the relevant semantic model from context/schema.
+4. Call `execute_dax_query` for business questions.
 
-## Account Setup
-
-For REST workspace discovery:
-
-1. Ask Claude to call `start_device_login`.
-2. Open the Microsoft verification URL.
-3. Sign in with the personal Power BI account.
-4. Ask Claude to call `complete_device_login`.
-
-If you do not need REST workspace discovery, configure `POWERBI_KNOWN_WORKSPACES` and let Microsoft Modeling MCP handle account auth when connecting to a known workspace.
-
-## Notes
-
-- `list_workspaces` uses `GET https://api.powerbi.com/v1.0/myorg/groups` with delegated personal-account auth.
-- `list_semantic_models` uses delegated personal-account auth.
-- `get_known_workspace_catalog` avoids REST discovery and lists semantic models from manually configured workspace names through Microsoft Modeling MCP.
-- The first query in a fresh Claude/MCP session can still trigger Microsoft account authentication. Follow-up queries in the same running session reuse the Modeling MCP process and connection.
+The first query in a fresh Claude/MCP session can still trigger Microsoft account authentication. Follow-up queries in the same running session reuse the Modeling MCP process and connection.

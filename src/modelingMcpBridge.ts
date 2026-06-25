@@ -1,4 +1,7 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
+import { projectRoot } from "./env.js";
 
 export type XmlaSemanticModel = {
   id: string;
@@ -114,10 +117,13 @@ export class ModelingMcpBridge {
   private async start(): Promise<void> {
     if (this.child) return;
 
-    const command = process.env.POWERBI_MODELING_MCP_COMMAND || "npx";
+    const bundledNativeCommand = resolve(projectRoot(), "node_modules/.bin/powerbi-modeling-mcp-darwin-arm64");
+    const command = process.env.POWERBI_MODELING_MCP_COMMAND || (existsSync(bundledNativeCommand) ? bundledNativeCommand : "npx");
     const args = process.env.POWERBI_MODELING_MCP_ARGS
       ? splitArgs(process.env.POWERBI_MODELING_MCP_ARGS)
-      : ["-y", "@microsoft/powerbi-modeling-mcp@latest", "--start"];
+      : command === "npx"
+        ? ["-y", "@microsoft/powerbi-modeling-mcp@latest", "--start", "--authmode=interactive"]
+        : ["--start", "--authmode=interactive"];
 
     this.child = spawn(command, args, {
       stdio: ["pipe", "pipe", "pipe"]
