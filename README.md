@@ -45,7 +45,7 @@ Use the built JS after `npm run build`.
 For this machine, start from [`docs/claude-desktop-config.example.json`](docs/claude-desktop-config.example.json). It points the wrapper to the Microsoft MCP binary installed by this repo:
 
 ```text
-/Users/ducna/powerBI-auth-by-account/node_modules/.bin/powerbi-modeling-mcp
+/Users/ducna/powerBI-auth-by-account/node_modules/.bin/powerbi-modeling-mcp-darwin-arm64
 ```
 
 Generic config:
@@ -60,7 +60,7 @@ Generic config:
         "POWERBI_TENANT": "vnu.edu.vn",
         "POWERBI_KNOWN_WORKSPACES": "test-mcp",
         "POWERBI_DEFAULT_WORKSPACE": "test-mcp",
-        "POWERBI_MODELING_MCP_COMMAND": "/absolute/path/to/powerbi-modeling-mcp",
+        "POWERBI_MODELING_MCP_COMMAND": "/absolute/path/to/powerbi-modeling-mcp-darwin-arm64",
         "POWERBI_MODELING_MCP_ARGS": "--start"
       }
     }

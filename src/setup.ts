@@ -6,7 +6,7 @@ import { stdin as input, stdout as output } from "node:process";
 import { resolve } from "node:path";
 import { defaultEnvPath, loadEnvFile, projectRoot } from "./env.js";
 
-const PROJECT_MODELING_MCP = resolve(projectRoot(), "node_modules/.bin/powerbi-modeling-mcp");
+const PROJECT_MODELING_MCP = resolve(projectRoot(), "node_modules/.bin/powerbi-modeling-mcp-darwin-arm64");
 
 async function main() {
   loadEnvFile();
