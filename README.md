@@ -30,7 +30,14 @@ This is intentional because REST/device-code auth is often blocked by tenant adm
 
 ## Install
 
+Prerequisites:
+
+- Node.js 18 or newer
+- git
+
 ```bash
+git clone https://github.com/nguyenanhducdeveloper86/powerBI-auth-by-account.git
+cd powerBI-auth-by-account
 npm install
 npm run setup
 npm run build
@@ -46,6 +53,25 @@ On macOS, `npm install` also ad-hoc signs the Microsoft native Modeling MCP bina
 - Optional default semantic model fallback
 
 It writes a local `.env` file with mode `0600`. The MCP server loads this file automatically on start.
+
+## Claude Code
+
+Register the MCP server with Claude Code:
+
+```bash
+claude mcp add powerbi-auth-by-account --scope user \
+  --env POWERBI_KNOWN_WORKSPACES="test-mcp" \
+  --env POWERBI_DEFAULT_WORKSPACE="test-mcp" \
+  --env POWERBI_MODELING_MCP_COMMAND="/absolute/path/to/powerbi-modeling-mcp-native-binary" \
+  --env POWERBI_MODELING_MCP_ARGS="--start --authmode=interactive" \
+  -- node /absolute/path/to/powerBI-auth-by-account/dist/server.js
+```
+
+On Windows, do not use `npx` for `POWERBI_MODELING_MCP_COMMAND`. Point directly to the native Microsoft Modeling MCP binary, for example:
+
+```text
+C:\Users\<you>\powerBI-auth-by-account\node_modules\@microsoft\powerbi-modeling-mcp-win32-x64\dist\powerbi-modeling-mcp.exe
+```
 
 ## Claude Desktop Config
 
@@ -76,6 +102,32 @@ Generic config:
 }
 ```
 
+Windows example:
+
+```json
+{
+  "mcpServers": {
+    "powerbi-auth-by-account": {
+      "command": "node",
+      "args": ["C:\\Users\\<you>\\powerBI-auth-by-account\\dist\\server.js"],
+      "env": {
+        "POWERBI_KNOWN_WORKSPACES": "test-mcp",
+        "POWERBI_DEFAULT_WORKSPACE": "test-mcp",
+        "POWERBI_MODELING_MCP_COMMAND": "C:\\Users\\<you>\\powerBI-auth-by-account\\node_modules\\@microsoft\\powerbi-modeling-mcp-win32-x64\\dist\\powerbi-modeling-mcp.exe",
+        "POWERBI_MODELING_MCP_ARGS": "--start --authmode=interactive"
+      }
+    }
+  }
+}
+```
+
+Claude Desktop config paths:
+
+- Standard install: `%APPDATA%\Claude\claude_desktop_config.json`
+- Microsoft Store/MSIX install: `%LOCALAPPDATA%\Packages\Claude_<id>\LocalCache\Roaming\Claude\claude_desktop_config.json`
+
+Close Claude Desktop completely before editing the config file. Otherwise Claude can overwrite the file and remove `mcpServers`.
+
 ## CEO Workflow
 
 For a simple CEO experience, set:
@@ -95,3 +147,11 @@ Then Claude can:
 4. Call `execute_dax_query` for business questions.
 
 The first query in a fresh Claude/MCP session can still trigger Microsoft account authentication. Follow-up queries in the same running session reuse the Modeling MCP process and connection.
+
+## Common Pitfalls
+
+- Windows: do not use `npx` for the Modeling MCP command. Use the native `powerbi-modeling-mcp.exe` path.
+- Authentication is `--authmode=interactive` through Microsoft Modeling MCP. Do not use REST device-code login.
+- Claude Desktop Store/MSIX uses the virtualized config path under `%LOCALAPPDATA%\Packages\Claude_<id>\LocalCache\Roaming\Claude`.
+- Close Claude Desktop before editing `claude_desktop_config.json`.
+- Always configure a real Premium/PPU workspace name in `POWERBI_KNOWN_WORKSPACES`; do not rely on `My workspace`.

@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "powerbi-auth-by-account": {
+      "command": "node",
+      "args": ["C:\\Users\\<you>\\powerBI-auth-by-account\\dist\\server.js"],
+      "env": {
+        "POWERBI_KNOWN_WORKSPACES": "test-mcp",
+        "POWERBI_DEFAULT_WORKSPACE": "test-mcp",
+        "POWERBI_MODELING_MCP_COMMAND": "C:\\Users\\<you>\\powerBI-auth-by-account\\node_modules\\@microsoft\\powerbi-modeling-mcp-win32-x64\\dist\\powerbi-modeling-mcp.exe",
+        "POWERBI_MODELING_MCP_ARGS": "--start --authmode=interactive"
+      }
+    }
+  }
+}
